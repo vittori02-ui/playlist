@@ -5,18 +5,22 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".MainActivity">
+    android:padding="12dp"
+    android:clickable="true"
+    android:focusable="true"
+    tools:context=".canzone">
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/titoloCan"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="LE MIE CANZONI"
-        android:textAlignment="center"
-        android:textSize="30sp"
+        android:textSize="16sp"
         android:textStyle="bold" />
 
-    <androidx.recyclerview.widget.RecyclerView
+    <TextView
+        android:id="@+id/artiCan"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="wrap_content"
+        android:textColor="#888888"
+        android:textSize="16sp" />
 </LinearLayout>
