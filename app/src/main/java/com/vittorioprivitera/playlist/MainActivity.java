@@ -6,6 +6,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.media3.common.MediaItem;
+import androidx.media3.common.Player;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -20,6 +21,7 @@ import android.os.Looper;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,7 +35,9 @@ public class MainActivity extends AppCompatActivity {
     private SeekBar seekBar;
     private final Handler handler=new Handler(Looper.getMainLooper());
     private TextView textSuona,tempoAttuale,tempoTotale;
-    private Button pausa;
+    private ImageButton avanti,dietro,pausa;
+    private int indice=-1;
+    private canzAdapter adap;
     private final String permission= Build.VERSION.SDK_INT>=33?Manifest.permission.READ_MEDIA_AUDIO:Manifest.permission.READ_EXTERNAL_STORAGE;
     private final ActivityResultLauncher<String> resultLauncher=registerForActivityResult(new ActivityResultContracts.RequestPermission(),granted->{
         if(granted)scanAndDisplaySong();
@@ -57,17 +61,26 @@ public class MainActivity extends AppCompatActivity {
         listaCanz.clear();
         listaCanz.addAll(caricaCanzoni());
         if(listaCanz.isEmpty())Toast.makeText(this,"nessun mp3 trovato",Toast.LENGTH_SHORT).show();
-        recyclerView.setAdapter(new canzAdapter(listaCanz,this::suona));
+        adap=new canzAdapter(listaCanz,this::suona);
+        recyclerView.setAdapter(adap);
     }
     private void suona(canzone canz)
     {
-        player.setMediaItem(MediaItem.fromUri(canz.getUri()));
+        indice=listaCanz.indexOf(canz);
+        suonaCorente();
+    }
+    private void suonaCorente()
+    {
+        if(indice<0||indice>=listaCanz.size())return;
+        canzone canz2=listaCanz.get(indice);
+        player.setMediaItem(MediaItem.fromUri(canz2.getUri()));
         player.prepare();
         player.play();
-        textSuona.setText(canz.getTitolo()+" - "+canz.getAutore());
-        pausa.setText("Pausa");
-        seekBar.setMax((int)canz.getDura());
-        tempoTotale.setText(formatta(canz.getDura()));
+        textSuona.setText(canz2.getTitolo()+" - "+canz2.getAutore());
+        pausa.setImageResource(R.drawable.chiudi);
+        seekBar.setMax((int)canz2.getDura());
+        tempoTotale.setText(formatta(canz2.getDura()));
+        adap.setPosSelezionata(indice);
     }
     @Override
     protected void onDestroy()
@@ -116,19 +129,35 @@ public class MainActivity extends AppCompatActivity {
         seekBar=findViewById(R.id.bar);
         tempoAttuale=findViewById(R.id.tempoAttuale);
         tempoTotale=findViewById(R.id.tempoTotale);
+        dietro=findViewById(R.id.dietro);
+        avanti=findViewById(R.id.avanti);
         player=new ExoPlayer.Builder(this).build();
+        player.addListener(new Player.Listener() {
+            @Override
+            public void onPlaybackStateChanged(int state)
+            {
+                if (state == player.STATE_ENDED)
+                {
+                    if(indice<listaCanz.size()-1)
+                    {
+                        indice++;
+                        suonaCorente();
+                    }
+                }
+            }
+        });
         pausa.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if(player.isPlaying())
                 {
                     player.pause();
-                    pausa.setText("Play");
+                    pausa.setImageResource(R.drawable.apri);
                 }
                 else
                 {
                     player.play();
-                    pausa.setText("Pausa");
+                    pausa.setImageResource(R.drawable.chiudi);
                 }
             }
         });
@@ -149,5 +178,25 @@ public class MainActivity extends AppCompatActivity {
         handler.post(upSeekBar);
         if(ContextCompat.checkSelfPermission(this,permission)== PackageManager.PERMISSION_GRANTED)scanAndDisplaySong();
         else resultLauncher.launch(permission);
+        avanti.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(indice<listaCanz.size()-1)
+                {
+                    indice++;
+                    suonaCorente();
+                }
+            }
+        });
+        dietro.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(indice>0)
+                {
+                    indice--;
+                    suonaCorente();
+                }
+            }
+        });
     }
 }

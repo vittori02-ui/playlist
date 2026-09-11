@@ -65,31 +65,33 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:paddingLeft="40dp">
 
-            <Button
-                android:id="@+id/button3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="30dp"
-                android:text="←"
-                android:textAlignment="center"
-                android:textSize="30dp" />
+            <ImageButton
+                android:id="@+id/dietro"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:background="@drawable/bottone"
+                android:padding="16dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/dietro" />
 
-            <Button
+            <ImageButton
                 android:id="@+id/pausePlay"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Play"
                 android:textSize="30sp" />
 
-            <Button
+            <ImageButton
                 android:id="@+id/avanti"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="→"
-                android:textAlignment="center"
-                android:textSize="30dp" />
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:background="@drawable/bottone"
+                android:padding="16dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/avanti" />
         </LinearLayout>
 
     </LinearLayout>

@@ -23,8 +23,15 @@ public class canzAdapter extends RecyclerView.Adapter<canzAdapter.canzoneViewHol
     @NonNull
     public canzoneViewHolder onCreateViewHolder(@NonNull ViewGroup parent,int viewType)
     {
-        View v= LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_canzone,parent,false);
+        View v= LayoutInflater.from(parent.getContext()).inflate(R.layout.canzone,parent,false);
         return new canzoneViewHolder(v);
+    }
+    public void setPosSelezionata(int pos)
+    {
+        int vecchiaPos=posizioneSele;
+        posizioneSele=pos;
+        notifyItemChanged(vecchiaPos);
+        notifyItemChanged(posizioneSele);
     }
     @Override
     public void onBindViewHolder(@NonNull canzoneViewHolder h,int position)
@@ -32,7 +39,6 @@ public class canzAdapter extends RecyclerView.Adapter<canzAdapter.canzoneViewHol
         canzone canz=canzoni.get(position);
         h.titolo.setText(canz.getTitolo());
         h.artista.setText(canz.getAutore());
-        h.itemView.setOnClickListener(v->listener.onCanzoneClick(canz));
         h.numero.setText(String.valueOf(position+1));
         h.itemView.setBackgroundColor(ContextCompat.getColor(h.itemView.getContext(),position==posizioneSele?R.color.selezionato:R.color.trasparente));
         h.itemView.setOnClickListener(view -> {
