@@ -2,8 +2,13 @@ package com.vittorioprivitera.playlist;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.media3.common.MediaItem;
+import androidx.media3.exoplayer.ExoPlayer;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.content.ContentUris;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -13,7 +18,6 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import android.Manifest;
 import java.util.List;
-
 public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private ExoPlayer player;
@@ -26,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private void scanAndDisplaySong()
     {
         listaCanz.clear();
-        listaCanz.addAll(caricamento());
+        listaCanz.addAll(caricaCanzoni());
         if(listaCanz.isEmpty())Toast.makeText(this,"nessun mp3 trovato",Toast.LENGTH_SHORT).show();
         recyclerView.setAdapter(new canzAdapter(listaCanz,this::suona));
     }
@@ -70,5 +74,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        recyclerView=findViewById(R.id.canzoni);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        player=new ExoPlayer.Builder(this).build();
+        if(ContextCompat.checkSelfPermission(this,permission)== PackageManager.PERMISSION_GRANTED)scanAndDisplaySong();
+        else resultLauncher.launch(permission);
     }
 }
