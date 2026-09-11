@@ -13,7 +13,13 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
+import android.view.View;
+import android.widget.Button;
+import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 import java.util.ArrayList;
 import android.Manifest;
@@ -22,11 +28,23 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private ExoPlayer player;
     private final List<canzone> listaCanz=new ArrayList<>();
+    private SeekBar seekBar;
+    private final Handler handler=new Handler(Looper.getMainLooper());
+    private TextView textSuona;
+    private Button pausa;
     private final String permission= Build.VERSION.SDK_INT>=33?Manifest.permission.READ_MEDIA_AUDIO:Manifest.permission.READ_EXTERNAL_STORAGE;
     private final ActivityResultLauncher<String> resultLauncher=registerForActivityResult(new ActivityResultContracts.RequestPermission(),granted->{
         if(granted)scanAndDisplaySong();
         else Toast.makeText(this,"permesso negato",Toast.LENGTH_LONG).show();
     });
+
+    private final Runnable upSeekBar=new Runnable() {
+        @Override
+        public void run() {
+            if(player.isPlaying())seekBar.setProgress((int)player.getCurrentPosition());
+            handler.postDelayed(this,500);
+        }
+    };
     private void scanAndDisplaySong()
     {
         listaCanz.clear();
@@ -76,7 +94,40 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         recyclerView=findViewById(R.id.canzoni);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        textSuona=findViewById(R.id.ora);
+        pausa=findViewById(R.id.pausePlay);
+        seekBar=findViewById(R.id.bar);
         player=new ExoPlayer.Builder(this).build();
+        pausa.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(player.isPlaying())
+                {
+                    player.pause();
+                    pausa.setText("Play");
+                }
+                else
+                {
+                    player.play();
+                    pausa.setText("Pausa");
+                }
+            }
+        });
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                if(b)player.seekTo(i);
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+        handler.post(upSeekBar);
         if(ContextCompat.checkSelfPermission(this,permission)== PackageManager.PERMISSION_GRANTED)scanAndDisplaySong();
         else resultLauncher.launch(permission);
     }

@@ -19,5 +19,32 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/canzoni"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_weight="1" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#EEEEEE"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <TextView
+            android:id="@+id/ora"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="nessuna in esecuzione"
+            android:textSize="14sp" />
+
+        <SeekBar
+            android:id="@+id/bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/pausePlay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Play" />
+    </LinearLayout>
 </LinearLayout>

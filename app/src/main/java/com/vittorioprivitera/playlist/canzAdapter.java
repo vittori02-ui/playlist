@@ -31,17 +31,19 @@ public class canzAdapter extends RecyclerView.Adapter<canzAdapter.canzoneViewHol
         h.titolo.setText(canz.getTitolo());
         h.artista.setText(canz.getAutore());
         h.itemView.setOnClickListener(v->listener.onCanzoneClick(canz));
+        h.numero.setText(String.valueOf(position+1));
     }
     @Override public int getItemCount(){
         return canzoni.size();
     }
     static class canzoneViewHolder extends RecyclerView.ViewHolder
     {
-        TextView titolo,artista;
+        TextView titolo,artista,numero;
         canzoneViewHolder(View v){
             super(v);
             titolo=v.findViewById(R.id.titoloCan);
             artista=v.findViewById(R.id.artiCan);
+            numero=v.findViewById(R.id.numero);
         }
     }
 }
