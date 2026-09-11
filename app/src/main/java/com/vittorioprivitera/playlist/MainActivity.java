@@ -1,3 +1,5 @@
+//17:09
+// 1 ora e 20
 package com.vittorioprivitera.playlist;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -30,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private final List<canzone> listaCanz=new ArrayList<>();
     private SeekBar seekBar;
     private final Handler handler=new Handler(Looper.getMainLooper());
-    private TextView textSuona;
+    private TextView textSuona,tempoAttuale,tempoTotale;
     private Button pausa;
     private final String permission= Build.VERSION.SDK_INT>=33?Manifest.permission.READ_MEDIA_AUDIO:Manifest.permission.READ_EXTERNAL_STORAGE;
     private final ActivityResultLauncher<String> resultLauncher=registerForActivityResult(new ActivityResultContracts.RequestPermission(),granted->{
@@ -41,8 +43,13 @@ public class MainActivity extends AppCompatActivity {
     private final Runnable upSeekBar=new Runnable() {
         @Override
         public void run() {
-            if(player.isPlaying())seekBar.setProgress((int)player.getCurrentPosition());
-            handler.postDelayed(this,500);
+            if(player.isPlaying())
+            {
+                long pos=player.getCurrentPosition();
+                seekBar.setProgress((int)pos);
+                tempoAttuale.setText(formatta(pos));
+            }
+            handler.postDelayed(this,100);
         }
     };
     private void scanAndDisplaySong()
@@ -57,6 +64,10 @@ public class MainActivity extends AppCompatActivity {
         player.setMediaItem(MediaItem.fromUri(canz.getUri()));
         player.prepare();
         player.play();
+        textSuona.setText(canz.getTitolo()+" - "+canz.getAutore());
+        pausa.setText("Pausa");
+        seekBar.setMax((int)canz.getDura());
+        tempoTotale.setText(formatta(canz.getDura()));
     }
     @Override
     protected void onDestroy()
@@ -88,6 +99,12 @@ public class MainActivity extends AppCompatActivity {
         }
         return canzoni;
     }
+    private String formatta(long tempo)
+    {
+        long minuti=(tempo/1000)/60;
+        long secondi=(tempo/1000)%60;
+        return String.format("%d:%02d",minuti,secondi);
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -97,6 +114,8 @@ public class MainActivity extends AppCompatActivity {
         textSuona=findViewById(R.id.ora);
         pausa=findViewById(R.id.pausePlay);
         seekBar=findViewById(R.id.bar);
+        tempoAttuale=findViewById(R.id.tempoAttuale);
+        tempoTotale=findViewById(R.id.tempoTotale);
         player=new ExoPlayer.Builder(this).build();
         pausa.setOnClickListener(new View.OnClickListener() {
             @Override

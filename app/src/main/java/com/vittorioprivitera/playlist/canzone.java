@@ -23,8 +23,11 @@ public class canzone  {
     public String getAutore() {
         return autore;
     }
-
     public Uri getUri() {
         return uri;
+    }
+
+    public long getDura() {
+        return dura;
     }
 }
