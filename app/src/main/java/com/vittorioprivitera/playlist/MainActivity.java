@@ -11,6 +11,7 @@ import androidx.media3.exoplayer.ExoPlayer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -40,7 +41,11 @@ public class MainActivity extends AppCompatActivity {
     private canzAdapter adap;
     private final String permission= Build.VERSION.SDK_INT>=33?Manifest.permission.READ_MEDIA_AUDIO:Manifest.permission.READ_EXTERNAL_STORAGE;
     private final ActivityResultLauncher<String> resultLauncher=registerForActivityResult(new ActivityResultContracts.RequestPermission(),granted->{
-        if(granted)scanAndDisplaySong();
+        if(granted)
+        {
+            creaCartella();
+            scanAndDisplaySong();
+        }
         else Toast.makeText(this,"permesso negato",Toast.LENGTH_LONG).show();
     });
 
@@ -60,9 +65,32 @@ public class MainActivity extends AppCompatActivity {
     {
         listaCanz.clear();
         listaCanz.addAll(caricaCanzoni());
-        if(listaCanz.isEmpty())Toast.makeText(this,"nessun mp3 trovato",Toast.LENGTH_SHORT).show();
+        if(listaCanz.isEmpty())Toast.makeText(this,"nessun mp3 trovato nella cartella fatta dakl' app",Toast.LENGTH_SHORT).show();
         adap=new canzAdapter(listaCanz,this::suona);
         recyclerView.setAdapter(adap);
+    }
+    private void creaCartella()
+    {
+        Uri col=MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+        String[] prot={MediaStore.Audio.Media._ID};
+        String sele=MediaStore.Audio.Media.RELATIVE_PATH+" LIKE ?";
+        String[] seleArgs={"Music/MiaPlaylist%"};
+        try(Cursor c=getContentResolver().query(col,prot,sele,seleArgs,null))
+        {
+            if(c!=null&&c.getCount()>0)return;
+        }
+        ContentValues val=new ContentValues();
+        val.put(MediaStore.Audio.Media.DISPLAY_NAME,".nomedia_placeholder");
+        val.put(MediaStore.Audio.Media.RELATIVE_PATH,"Music/MiaPlaylist");
+        val.put(MediaStore.Audio.Media.MIME_TYPE,"audio/mpeg");
+        val.put(MediaStore.Audio.Media.IS_PENDING,1);
+        Uri uri=getContentResolver().insert(col,val);
+        if(uri!=null)
+        {
+            val.clear();
+            val.put(MediaStore.Audio.Media.IS_PENDING,0);
+            getContentResolver().update(uri,val,null,null);
+        }
     }
     private void suona(canzone canz)
     {
@@ -91,10 +119,11 @@ public class MainActivity extends AppCompatActivity {
     private List<canzone> caricaCanzoni()
     {
         List<canzone>canzoni=new ArrayList<>();
-        Uri col= MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+        Uri col= MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;     //funziona per android 10 in su NB readme
         String[] projection={MediaStore.Audio.Media._ID, MediaStore.Audio.Media.TITLE,MediaStore.Audio.Media.ARTIST, MediaStore.Audio.Media.DURATION};
-        String sele= MediaStore.Audio.Media.IS_MUSIC+"!=0";
-        try(Cursor c=getContentResolver().query(col,projection,sele,null,null))
+        String sele= MediaStore.Audio.Media.IS_MUSIC+"!=0 AND "+MediaStore.Audio.Media.RELATIVE_PATH+" LIKE ?";
+        String[] seleArgs={"Music/MiaPlaylist%"};
+        try(Cursor c=getContentResolver().query(col,projection,sele,seleArgs,null))
         {
             if(c!=null)
             {
@@ -176,7 +205,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         handler.post(upSeekBar);
-        if(ContextCompat.checkSelfPermission(this,permission)== PackageManager.PERMISSION_GRANTED)scanAndDisplaySong();
+        if(ContextCompat.checkSelfPermission(this,permission)== PackageManager.PERMISSION_GRANTED)
+        {
+            creaCartella();
+            scanAndDisplaySong();
+        }
         else resultLauncher.launch(permission);
         avanti.setOnClickListener(new View.OnClickListener() {
             @Override
