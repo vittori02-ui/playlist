@@ -1,5 +1,4 @@
-//17:09
-// 1 ora e 20
+//10:37
 package com.vittorioprivitera.playlist;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -7,7 +6,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.Player;
-import androidx.media3.exoplayer.ExoPlayer;
+import android.content.ComponentName;
+import androidx.media3.session.SessionToken;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.content.ContentUris;
@@ -21,17 +21,19 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
+import androidx.media3.session.MediaController;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.util.ArrayList;
 import android.Manifest;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.util.List;
 public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
-    private ExoPlayer player;
+    private MediaController player;
+    private ListenableFuture<MediaController>controller;
     private final List<canzone> listaCanz=new ArrayList<>();
     private SeekBar seekBar;
     private final Handler handler=new Handler(Looper.getMainLooper());
@@ -114,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy()
     {
         super.onDestroy();
-        player.release();
+        MediaController.releaseFuture(controller);
     }
     private List<canzone> caricaCanzoni()
     {
@@ -147,6 +149,27 @@ public class MainActivity extends AppCompatActivity {
         long secondi=(tempo/1000)%60;
         return String.format("%d:%02d",minuti,secondi);
     }
+    private void collagaListe()
+    {
+        player.addListener(new Player.Listener() {
+            @Override
+            public void onPlaybackStateChanged(int state)
+            {
+                if(state==Player.STATE_ENDED)
+                {
+                    if(indice<listaCanz.size()-1)
+                    {
+                        indice++;
+                        suonaCorente();
+                    }
+                }
+            }
+        });
+    }
+    private void impostaListeUi()
+    {
+        pausa.se
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -160,76 +183,26 @@ public class MainActivity extends AppCompatActivity {
         tempoTotale=findViewById(R.id.tempoTotale);
         dietro=findViewById(R.id.dietro);
         avanti=findViewById(R.id.avanti);
-        player=new ExoPlayer.Builder(this).build();
-        player.addListener(new Player.Listener() {
-            @Override
-            public void onPlaybackStateChanged(int state)
+
+        SessionToken session=new SessionToken(this,new ComponentName(this,playBack.class));
+        controller=new MediaController.Builder(this,session).buildAsync();
+        controller.addListener(()->{
+            try {
+                player=controller.get();
+                collagaListe();
+                if(ContextCompat.checkSelfPermission(this,permission)==PackageManager.PERMISSION_GRANTED)
+                {
+                    creaCartella();
+                    scanAndDisplaySong();
+                }
+                else resultLauncher.launch(permission);
+                handler.post(upSeekBar);
+            }
+            catch (Exception e)
             {
-                if (state == player.STATE_ENDED)
-                {
-                    if(indice<listaCanz.size()-1)
-                    {
-                        indice++;
-                        suonaCorente();
-                    }
-                }
+                e.printStackTrace();
             }
-        });
-        pausa.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(player.isPlaying())
-                {
-                    player.pause();
-                    pausa.setImageResource(R.drawable.apri);
-                }
-                else
-                {
-                    player.play();
-                    pausa.setImageResource(R.drawable.chiudi);
-                }
-            }
-        });
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                if(b)player.seekTo(i);
-            }
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
 
-            }
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
-        handler.post(upSeekBar);
-        if(ContextCompat.checkSelfPermission(this,permission)== PackageManager.PERMISSION_GRANTED)
-        {
-            creaCartella();
-            scanAndDisplaySong();
-        }
-        else resultLauncher.launch(permission);
-        avanti.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(indice<listaCanz.size()-1)
-                {
-                    indice++;
-                    suonaCorente();
-                }
-            }
-        });
-        dietro.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(indice>0)
-                {
-                    indice--;
-                    suonaCorente();
-                }
-            }
-        });
+        },ContextCompat.getMainExecutor(this));
     }
 }
