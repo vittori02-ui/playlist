@@ -1,10 +1,12 @@
-//10:37
+//15:41
+//1;28
 package com.vittorioprivitera.playlist;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.media3.common.MediaItem;
+import androidx.media3.common.MediaMetadata;
 import androidx.media3.common.Player;
 import android.content.ComponentName;
 import androidx.media3.session.SessionToken;
@@ -63,6 +65,9 @@ public class MainActivity extends AppCompatActivity {
             handler.postDelayed(this,100);
         }
     };
+    private final ActivityResultLauncher<String>notifica=registerForActivityResult(new ActivityResultContracts.RequestPermission(),granted -> {
+    });
+
     private void scanAndDisplaySong()
     {
         listaCanz.clear();
@@ -73,7 +78,17 @@ public class MainActivity extends AppCompatActivity {
         List<MediaItem> item=new ArrayList<>();
         for(canzone c:listaCanz)
         {
-            item.add(MediaItem.fromUri(c.getUri()));
+            MediaMetadata metadata=new MediaMetadata.Builder()
+                    .setTitle(c.getTitolo())
+                    .setArtist(c.getAutore())
+                    .build();
+
+            MediaItem itemMedia=new MediaItem.Builder()
+                    .setUri(c.getUri())
+                    .setMediaMetadata(metadata)
+                    .build();
+
+            item.add(itemMedia);
         }
         player.setMediaItems(item);
         player.prepare();
@@ -119,6 +134,7 @@ public class MainActivity extends AppCompatActivity {
         tempoTotale.setText(formatta(canz.getDura()));
         adap.setPosSelezionata(indice);
     }
+    /*
     private void suonaCorente()
     {
         if(indice<0||indice>=listaCanz.size())return;
@@ -131,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
         seekBar.setMax((int)canz2.getDura());
         tempoTotale.setText(formatta(canz2.getDura()));
         adap.setPosSelezionata(indice);
-    }
+    }*/
     @Override
     protected void onDestroy()
     {
@@ -167,6 +183,7 @@ public class MainActivity extends AppCompatActivity {
     {
         long minuti=(tempo/1000)/60;
         long secondi=(tempo/1000)%60;
+
         return String.format("%d:%02d",minuti,secondi);
     }
     private void collagaListe()
@@ -178,21 +195,19 @@ public class MainActivity extends AppCompatActivity {
                 indice=player.getCurrentMediaItemIndex();
                 aggiornaUI();
             }
+            @Override
+            public void onIsPlayingChanged(boolean isPlaying)
+            {
+                if(isPlaying)pausa.setImageResource(R.drawable.chiudi);
+                else pausa.setImageResource(R.drawable.apri);
+            }
         });
     }
     private void impostaListeUi()
     {
         pausa.setOnClickListener(v->{
-            if(player.isPlaying())
-            {
-                player.pause();
-                pausa.setImageResource(R.drawable.apri);
-            }
-            else
-            {
-                player.play();
-                pausa.setImageResource(R.drawable.chiudi);
-            }
+            if(player.isPlaying())player.pause();
+            else player.play();
         });
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -227,6 +242,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if(Build.VERSION.SDK_INT>=33)
+        {
+            if(ContextCompat.checkSelfPermission(this,Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED)
+            {
+                notifica.launch(Manifest.permission.POST_NOTIFICATIONS);
+            }
+        }
         recyclerView=findViewById(R.id.canzoni);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         textSuona=findViewById(R.id.ora);
@@ -236,7 +258,6 @@ public class MainActivity extends AppCompatActivity {
         tempoTotale=findViewById(R.id.tempoTotale);
         dietro=findViewById(R.id.dietro);
         avanti=findViewById(R.id.avanti);
-
         SessionToken session=new SessionToken(this,new ComponentName(this,playBack.class));
         controller=new MediaController.Builder(this,session).buildAsync();
         controller.addListener(()->{

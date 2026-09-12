@@ -1,4 +1,6 @@
 package com.vittorioprivitera.playlist;
+import androidx.media3.common.AudioAttributes;
+import androidx.media3.common.C;
 import androidx.media3.session.MediaSession;
 import androidx.annotation.Nullable;
 import androidx.media3.exoplayer.ExoPlayer;
@@ -10,8 +12,15 @@ public class playBack extends MediaSessionService {
     @Override
     public void onCreate() {
         super.onCreate();
-        player = new ExoPlayer.Builder(this).build();
-        session = new MediaSession.Builder(this, player).build();
+        AudioAttributes audio=new AudioAttributes.Builder()
+                .setUsage(C.USAGE_MEDIA)
+                .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
+                .build();
+        player=new ExoPlayer.Builder(this)
+                .setAudioAttributes(audio,true)
+                .setHandleAudioBecomingNoisy(true)
+                .build();
+        session=new MediaSession.Builder(this,player).build();
     }
     @Nullable
     @Override
