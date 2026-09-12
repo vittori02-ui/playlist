@@ -1,6 +1,7 @@
 package com.vittorioprivitera.playlist;
 import androidx.media3.common.AudioAttributes;
 import androidx.media3.common.C;
+import androidx.media3.common.Player;
 import androidx.media3.session.MediaSession;
 import androidx.annotation.Nullable;
 import androidx.media3.exoplayer.ExoPlayer;
@@ -20,6 +21,7 @@ public class playBack extends MediaSessionService {
                 .setAudioAttributes(audio,true)
                 .setHandleAudioBecomingNoisy(true)
                 .build();
+        player.setRepeatMode(Player.REPEAT_MODE_ALL);
         session=new MediaSession.Builder(this,player).build();
     }
     @Nullable
