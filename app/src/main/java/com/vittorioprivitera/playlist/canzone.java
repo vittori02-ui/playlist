@@ -6,14 +6,16 @@ public class canzone  {
     private final String autore;
     private final long dura;
     private final Uri uri;
+    private final Uri copertina;
 
-    public canzone(long id,String titolo,String  autore,long dura,Uri uri)
+    public canzone(long id,String titolo,String  autore,long dura,Uri uri,Uri copertina)
     {
         this.id=id;
         this.titolo=titolo;
         this.autore=autore;
         this.dura=dura;
         this.uri=uri;
+        this.copertina=copertina;
     }
 
     public String getTitolo() {
@@ -29,5 +31,8 @@ public class canzone  {
 
     public long getDura() {
         return dura;
+    }
+    public Uri getCopertina(){
+        return copertina;
     }
 }

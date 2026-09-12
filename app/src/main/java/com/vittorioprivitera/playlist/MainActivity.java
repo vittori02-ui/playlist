@@ -158,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
     {
         List<canzone>canzoni=new ArrayList<>();
         Uri col= MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;     //funziona per android 10 in su NB readme
-        String[] projection={MediaStore.Audio.Media._ID, MediaStore.Audio.Media.TITLE,MediaStore.Audio.Media.ARTIST, MediaStore.Audio.Media.DURATION};
+        String[] projection={MediaStore.Audio.Media._ID, MediaStore.Audio.Media.TITLE,MediaStore.Audio.Media.ARTIST, MediaStore.Audio.Media.DURATION,MediaStore.Audio.Media.ALBUM_ID};
         String sele= MediaStore.Audio.Media.IS_MUSIC+"!=0 AND "+MediaStore.Audio.Media.RELATIVE_PATH+" LIKE ?";
         String[] seleArgs={"Music/MiaPlaylist%"};
         try(Cursor c=getContentResolver().query(col,projection,sele,seleArgs,null))
@@ -169,11 +169,14 @@ public class MainActivity extends AppCompatActivity {
                 int titolo=c.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE);
                 int artista=c.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST);
                 int durCol=c.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION);
+                int cop=c.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID);
                 while(c.moveToNext())
                 {
                     long id=c.getLong(idcol);
                     Uri uri= ContentUris.withAppendedId(col,id);
-                    canzoni.add(new canzone(id,c.getString(titolo),c.getString(artista),c.getLong(durCol),uri));
+                    long albumid=c.getLong(cop);
+                    Uri copertina=ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart"),albumid);
+                    canzoni.add(new canzone(id,c.getString(titolo),c.getString(artista),c.getLong(durCol),uri,copertina));
                 }
             }
         }

@@ -28,6 +28,15 @@
             android:textSize="16sp"
             android:textStyle="bold" />
 
+        <ImageView
+            android:id="@+id/copertina"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="12dp"
+            android:scaleType="centerCrop"
+            android:src="@tools:sample/avatars"
+            app:srcCompat="@drawable/apri" />
+
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
