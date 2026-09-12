@@ -70,6 +70,13 @@ public class MainActivity extends AppCompatActivity {
         if(listaCanz.isEmpty())Toast.makeText(this,"nessun mp3 trovato nella cartella fatta dakl' app",Toast.LENGTH_SHORT).show();
         adap=new canzAdapter(listaCanz,this::suona);
         recyclerView.setAdapter(adap);
+        List<MediaItem> item=new ArrayList<>();
+        for(canzone c:listaCanz)
+        {
+            item.add(MediaItem.fromUri(c.getUri()));
+        }
+        player.setMediaItems(item);
+        player.prepare();
     }
     private void creaCartella()
     {
@@ -97,7 +104,20 @@ public class MainActivity extends AppCompatActivity {
     private void suona(canzone canz)
     {
         indice=listaCanz.indexOf(canz);
-        suonaCorente();
+        player.seekTo(indice,0);
+        player.play();
+        //suonaCorente();
+        aggiornaUI();
+    }
+    private void aggiornaUI()
+    {
+        if(indice<0||indice>=listaCanz.size())return;
+        canzone canz=listaCanz.get(indice);
+        textSuona.setText(canz.getTitolo()+" - "+canz.getAutore());
+        pausa.setImageResource(R.drawable.chiudi);
+        seekBar.setMax((int)canz.getDura());
+        tempoTotale.setText(formatta(canz.getDura()));
+        adap.setPosSelezionata(indice);
     }
     private void suonaCorente()
     {
@@ -153,22 +173,55 @@ public class MainActivity extends AppCompatActivity {
     {
         player.addListener(new Player.Listener() {
             @Override
-            public void onPlaybackStateChanged(int state)
+            public void onMediaItemTransition(MediaItem mediaItem,int reason)
             {
-                if(state==Player.STATE_ENDED)
-                {
-                    if(indice<listaCanz.size()-1)
-                    {
-                        indice++;
-                        suonaCorente();
-                    }
-                }
+                indice=player.getCurrentMediaItemIndex();
+                aggiornaUI();
             }
         });
     }
     private void impostaListeUi()
     {
-        pausa.se
+        pausa.setOnClickListener(v->{
+            if(player.isPlaying())
+            {
+                player.pause();
+                pausa.setImageResource(R.drawable.apri);
+            }
+            else
+            {
+                player.play();
+                pausa.setImageResource(R.drawable.chiudi);
+            }
+        });
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                if(b)player.seekTo(i);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+        avanti.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                player.seekToNext();
+            }
+        });
+        dietro.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                player.seekToPrevious();
+            }
+        });
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -190,6 +243,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 player=controller.get();
                 collagaListe();
+                impostaListeUi();
                 if(ContextCompat.checkSelfPermission(this,permission)==PackageManager.PERMISSION_GRANTED)
                 {
                     creaCartella();
@@ -202,7 +256,6 @@ public class MainActivity extends AppCompatActivity {
             {
                 e.printStackTrace();
             }
-
         },ContextCompat.getMainExecutor(this));
     }
 }
