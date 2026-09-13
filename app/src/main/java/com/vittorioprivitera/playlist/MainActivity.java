@@ -19,6 +19,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.media.browse.MediaBrowser;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -28,6 +29,7 @@ import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Size;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -51,12 +53,13 @@ public class MainActivity extends AppCompatActivity {
     private final Handler handler=new Handler(Looper.getMainLooper());
     private TextView textSuona,tempoAttuale,tempoTotale;
     private ImageButton avanti,dietro,pausa;
-    private int indice=-1;
+    private int indice=-1,indiceSal=-1;
     private canzAdapter adap;
     private ImageView cope;
     private EditText cerca;
     private View pannelloBar;
     private Button indietro;
+    private long posSalvata=0;
     private final String permission= Build.VERSION.SDK_INT>=33?Manifest.permission.READ_MEDIA_AUDIO:Manifest.permission.READ_EXTERNAL_STORAGE;
     private final ActivityResultLauncher<String> resultLauncher=registerForActivityResult(new ActivityResultContracts.RequestPermission(),granted->{
         if(granted)
@@ -106,7 +109,8 @@ public class MainActivity extends AppCompatActivity {
         }
         player.setMediaItems(item);
         player.prepare();
-        playerState.contestoAttuale=-1;
+        indiceSal=-1;
+        posSalvata=0;
     }
     private void creaCartella()
     {
@@ -247,6 +251,7 @@ public class MainActivity extends AppCompatActivity {
     private void impostaListeUi()
     {
         pausa.setOnClickListener(v->{
+            //Toast.makeText(this,"click "+player.isPlaying(),Toast.LENGTH_SHORT).show();
             if(player.isPlaying())player.pause();
             else player.play();
         });
@@ -299,7 +304,37 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume()
     {
         super.onResume();
-        if(player!=null&&playerState.contestoAttuale!=-1)scanAndDisplaySong();
+        playerState.contestoAttuale=-1;
+        if(player!=null)
+        {
+            if(listaCanz.isEmpty())scanAndDisplaySong();
+            else if(indiceSal!=-1)
+            {
+                List<MediaItem> item=new ArrayList<>();
+                for(canzone c:listaCanz)
+                {
+                    MediaMetadata metadata=new MediaMetadata.Builder()
+                            .setTitle(c.getTitolo())
+                            .setArtist(c.getAutore())
+                            .build();
+                    MediaItem itemMedia=new MediaItem.Builder()
+                            .setUri(c.getUri())
+                            .setMediaMetadata(metadata)
+                            .build();
+                    item.add(itemMedia);
+                }
+                player.setMediaItems(item);
+                player.prepare();
+                indice=indiceSal;
+                player.seekTo(indiceSal,posSalvata);
+                aggiornaUI();
+                handler.postDelayed(()->{
+                    player.play();
+                },200);
+                indiceSal=-1;
+                posSalvata=0;
+            }
+        }
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -366,6 +401,8 @@ public class MainActivity extends AppCompatActivity {
         indietro.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                indiceSal=player.getCurrentMediaItemIndex();
+                posSalvata=player.getCurrentPosition();
                 startActivity(new Intent(MainActivity.this,playlistaActivity.class));
             }
         });
