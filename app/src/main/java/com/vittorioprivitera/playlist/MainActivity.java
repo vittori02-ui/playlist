@@ -295,6 +295,22 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        /*dbManager.ex.execute(()->{
+            try
+            {
+                appDb db=dbManager.getDatabase(this);
+                db.playlistDao().inserisci(new playlist("Preferiti"));
+                List<playlist> tutte=db.playlistDao().getTutte();
+                for(playlist p:tutte)
+                {
+                    System.out.println("test playTrovata "+p.nome+" id "+p.id);
+                }
+            }
+            catch (Exception e)
+            {
+                System.out.println("Test ERROREEE ");
+            }
+        });*/
         if(Build.VERSION.SDK_INT>=33)
         {
             if(ContextCompat.checkSelfPermission(this,Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED)
