@@ -106,6 +106,7 @@ public class MainActivity extends AppCompatActivity {
         }
         player.setMediaItems(item);
         player.prepare();
+        playerState.contestoAttuale=-1;
     }
     private void creaCartella()
     {
@@ -293,6 +294,12 @@ public class MainActivity extends AppCompatActivity {
             pannelloBar.setVisibility(hasFocus?View.GONE:View.VISIBLE);
             if(cerca.getText().toString().isEmpty())pannelloBar.setVisibility(View.VISIBLE);
         });*/
+    }
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+        if(player!=null&&playerState.contestoAttuale!=-1)scanAndDisplaySong();
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {

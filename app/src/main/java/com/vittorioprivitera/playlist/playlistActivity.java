@@ -56,6 +56,7 @@ public class playlistActivity extends AppCompatActivity {
                 }
                 player.setMediaItems(items);
                 player.prepare();
+                playerState.contestoAttuale=idPlay;
             });
         });
     }
