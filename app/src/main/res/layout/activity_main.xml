@@ -29,6 +29,14 @@
         android:orientation="vertical"
         android:padding="12dp">
 
+        <ImageView
+            android:id="@+id/copertina2"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_marginLeft="140dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_music_placeholder" />
+
         <TextView
             android:id="@+id/ora"
             android:layout_width="match_parent"

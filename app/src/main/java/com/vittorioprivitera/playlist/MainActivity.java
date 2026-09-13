@@ -25,6 +25,8 @@ import android.provider.MediaStore;
 import android.view.View;
 import android.widget.ImageButton;
 import androidx.media3.session.MediaController;
+import com.bumptech.glide.Glide;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -43,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton avanti,dietro,pausa;
     private int indice=-1;
     private canzAdapter adap;
+    private ImageView cope;
     private final String permission= Build.VERSION.SDK_INT>=33?Manifest.permission.READ_MEDIA_AUDIO:Manifest.permission.READ_EXTERNAL_STORAGE;
     private final ActivityResultLauncher<String> resultLauncher=registerForActivityResult(new ActivityResultContracts.RequestPermission(),granted->{
         if(granted)
@@ -133,6 +136,11 @@ public class MainActivity extends AppCompatActivity {
         seekBar.setMax((int)canz.getDura());
         tempoTotale.setText(formatta(canz.getDura()));
         adap.setPosSelezionata(indice);
+        Glide.with(this)
+                .load(canz.getCopertina())
+                .placeholder(R.drawable.ic_music_placeholder)
+                .error(R.drawable.ic_music_placeholder)
+                .into(cope);
     }
     /*
     private void suonaCorente()
@@ -177,6 +185,7 @@ public class MainActivity extends AppCompatActivity {
                     long albumid=c.getLong(cop);
                     Uri copertina=ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart"),albumid);
                     canzoni.add(new canzone(id,c.getString(titolo),c.getString(artista),c.getLong(durCol),uri,copertina));
+                    System.out.println("copertina URI "+copertina.toString());
                 }
             }
         }
@@ -261,6 +270,7 @@ public class MainActivity extends AppCompatActivity {
         tempoTotale=findViewById(R.id.tempoTotale);
         dietro=findViewById(R.id.dietro);
         avanti=findViewById(R.id.avanti);
+        cope=findViewById(R.id.copertina2);
         SessionToken session=new SessionToken(this,new ComponentName(this,playBack.class));
         controller=new MediaController.Builder(this,session).buildAsync();
         controller.addListener(()->{

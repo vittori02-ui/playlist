@@ -34,7 +34,7 @@
             android:layout_height="48dp"
             android:layout_marginEnd="12dp"
             android:scaleType="centerCrop"
-            android:src="@tools:sample/avatars"
+            android:src="@drawable/ic_music_placeholder"
             app:srcCompat="@drawable/apri" />
 
         <LinearLayout
