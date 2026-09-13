@@ -8,6 +8,8 @@ import java.util.List;
 public interface playlistDao {
     @Insert
     void inserisci(playlist play);
+    @Insert
+    long inserisciEritornaId(playlist play);
     @Delete
     void elimina(playlist play);
     @Query("SELECT* FROM playlist ORDER BY nome ASC")
@@ -17,6 +19,6 @@ public interface playlistDao {
     void aggCanzone(playlistCanz pc);
     @Delete
     void rimuoviCanz(playlistCanz pc);
-    @Query("SELECT canzoneId FROM playlist_canzone WHERE playlistId= :playlistId")
-    List<Long>getCazoniIds(int playlistId);
+    @Query("SELECT canzoneId FROM playlist_canzone WHERE playlistId = :playlistId")
+    List<Long>getCanzoniIds(int playlistId);
 }

@@ -299,11 +299,13 @@ public class MainActivity extends AppCompatActivity {
             try
             {
                 appDb db=dbManager.getDatabase(this);
-                db.playlistDao().inserisci(new playlist("Preferiti"));
-                List<playlist> tutte=db.playlistDao().getTutte();
-                for(playlist p:tutte)
+                playlist p=new playlist("Preferiti");
+                long idInserito=db.playlistDao().inserisciEritornaId(p);
+                db.playlistDao().aggCanzone(new playlistCanz((int)idInserito,123L));
+                List<Long>tutte=db.playlistDao().getCanzoniIds((int)idInserito);
+                for(Long id:tutte)
                 {
-                    System.out.println("test playTrovata "+p.nome+" id "+p.id);
+                    System.out.println("test playTrovata id "+id);
                 }
             }
             catch (Exception e)

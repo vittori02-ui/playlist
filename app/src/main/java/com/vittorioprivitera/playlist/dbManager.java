@@ -11,7 +11,9 @@ public class dbManager {
     public static final ExecutorService ex= Executors.newSingleThreadExecutor();
     public static appDb getDatabase(Context cont)
     {
-        if(istanza==null)istanza= Room.databaseBuilder(cont.getApplicationContext(),appDb.class,"playlist_database").build();
+        if(istanza==null)istanza= Room.databaseBuilder(cont.getApplicationContext(),appDb.class,"playlist_database")
+                .fallbackToDestructiveMigration() //distrugge i dati quando cambia la versione, in versione definitiva mettere una migrazione sicura
+                .build();
         return istanza;
     }
 }
