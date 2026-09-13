@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.MediaMetadata;
+import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
 import android.content.ComponentName;
 import androidx.media3.session.SessionToken;
@@ -16,13 +17,18 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Size;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import androidx.media3.session.MediaController;
 import com.bumptech.glide.Glide;
@@ -46,6 +52,8 @@ public class MainActivity extends AppCompatActivity {
     private int indice=-1;
     private canzAdapter adap;
     private ImageView cope;
+    private EditText cerca;
+    private View pannelloBar;
     private final String permission= Build.VERSION.SDK_INT>=33?Manifest.permission.READ_MEDIA_AUDIO:Manifest.permission.READ_EXTERNAL_STORAGE;
     private final ActivityResultLauncher<String> resultLauncher=registerForActivityResult(new ActivityResultContracts.RequestPermission(),granted->{
         if(granted)
@@ -132,16 +140,28 @@ public class MainActivity extends AppCompatActivity {
         if(indice<0||indice>=listaCanz.size())return;
         canzone canz=listaCanz.get(indice);
         textSuona.setText(canz.getTitolo()+" - "+canz.getAutore());
-        pausa.setImageResource(R.drawable.chiudi);
+        pausa.setImageResource(R.drawable.apri);
         seekBar.setMax((int)canz.getDura());
         tempoTotale.setText(formatta(canz.getDura()));
         adap.setPosSelezionata(indice);
-        Glide.with(this)
-                .load(canz.getCopertina())
-                .placeholder(R.drawable.ic_music_placeholder)
-                .error(R.drawable.ic_music_placeholder)
-                .into(cope);
+        Bitmap cover=caricaCopertina(canz.getUri());
+        if(cover!=null)Glide.with(this).load(cover).into(cope);
+        else Glide.with(this).load(R.drawable.ic_music_placeholder).into(cope);
     }
+    private Bitmap caricaCopertina(Uri canz)
+    {
+        try
+        {
+            if(Build.VERSION.SDK_INT>=29)return getContentResolver().loadThumbnail(canz,new Size(600,600),null);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    //android:windowSoftInputMode="adjustPan">
+    //nel manifest cosi il layout non si alza
     /*
     private void suonaCorente()
     {
@@ -213,6 +233,11 @@ public class MainActivity extends AppCompatActivity {
                 if(isPlaying)pausa.setImageResource(R.drawable.chiudi);
                 else pausa.setImageResource(R.drawable.apri);
             }
+            @Override
+            public void onPlayerError(PlaybackException e)
+            {
+                Toast.makeText(MainActivity.this,"impossibile ripro il brano",Toast.LENGTH_SHORT).show();
+            }
         });
     }
     private void impostaListeUi()
@@ -249,6 +274,22 @@ public class MainActivity extends AppCompatActivity {
                 player.seekToPrevious();
             }
         });
+        cerca.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+            @Override
+            public void onTextChanged(CharSequence s, int i, int i1, int i2) {
+                if(adap!=null)adap.filtra(s.toString());
+            }
+            @Override
+            public void afterTextChanged(Editable editable) {
+            }
+        });
+        /*cerca.setOnFocusChangeListener((v,hasFocus)->{
+            pannelloBar.setVisibility(hasFocus?View.GONE:View.VISIBLE);
+            if(cerca.getText().toString().isEmpty())pannelloBar.setVisibility(View.VISIBLE);
+        });*/
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -271,6 +312,8 @@ public class MainActivity extends AppCompatActivity {
         dietro=findViewById(R.id.dietro);
         avanti=findViewById(R.id.avanti);
         cope=findViewById(R.id.copertina2);
+        cerca=findViewById(R.id.cercaCnz);
+        pannelloBar=findViewById(R.id.layoutBar);
         SessionToken session=new SessionToken(this,new ComponentName(this,playBack.class));
         controller=new MediaController.Builder(this,session).buildAsync();
         controller.addListener(()->{

@@ -3,6 +3,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,19 +16,39 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 
+import java.util.ArrayList;
 import java.util.List;
 public class canzAdapter extends RecyclerView.Adapter<canzAdapter.canzoneViewHolder> {
     public interface OnCanzoneClickListener{
         void onCanzoneClick(canzone can);
     }
     private final List<canzone> canzoni;
+    private List<canzone> canzoniMostrate;  //filtro ricerca
     private final OnCanzoneClickListener listener;
     private int posizioneSele=-1;
     public canzAdapter(List<canzone> canzoni,OnCanzoneClickListener listener)
     {
         this.canzoni=canzoni;
         this.listener=listener;
+        this.canzoniMostrate=new ArrayList<>(canzoni);
     }
+
+    public void filtra(String testo)
+    {
+        canzoniMostrate.clear();
+        if(TextUtils.isEmpty(testo))canzoniMostrate.addAll(canzoni);
+        else
+        {
+            String cerca=testo.toLowerCase();
+            for(canzone c:canzoni)
+            {
+                if(c.getTitolo().toLowerCase().contains(cerca)||c.getAutore().toLowerCase().contains(cerca))canzoniMostrate.add(c);
+            }
+        }
+        posizioneSele=1; //reset visivo quando filtri che vedi la prima ricerca per essere riprodotta
+        notifyDataSetChanged();
+    }
+
     @Override
     @NonNull
     public canzoneViewHolder onCreateViewHolder(@NonNull ViewGroup parent,int viewType)
@@ -45,7 +66,7 @@ public class canzAdapter extends RecyclerView.Adapter<canzAdapter.canzoneViewHol
     @Override
     public void onBindViewHolder(@NonNull canzoneViewHolder h,int position)
     {
-        canzone canz=canzoni.get(position);
+        canzone canz=canzoniMostrate.get(position);
         h.titolo.setText(canz.getTitolo());
         h.artista.setText(canz.getAutore());
         h.numero.setText(String.valueOf(position+1));
@@ -79,7 +100,7 @@ public class canzAdapter extends RecyclerView.Adapter<canzAdapter.canzoneViewHol
         return null;
     }
     @Override public int getItemCount(){
-        return canzoni.size();
+        return canzoniMostrate.size();
     }
     static class canzoneViewHolder extends RecyclerView.ViewHolder
     {
