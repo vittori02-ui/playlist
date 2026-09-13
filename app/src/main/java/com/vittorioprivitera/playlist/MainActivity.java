@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -28,6 +29,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Size;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import androidx.media3.session.MediaController;
@@ -54,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageView cope;
     private EditText cerca;
     private View pannelloBar;
+    private Button indietro;
     private final String permission= Build.VERSION.SDK_INT>=33?Manifest.permission.READ_MEDIA_AUDIO:Manifest.permission.READ_EXTERNAL_STORAGE;
     private final ActivityResultLauncher<String> resultLauncher=registerForActivityResult(new ActivityResultContracts.RequestPermission(),granted->{
         if(granted)
@@ -332,6 +335,7 @@ public class MainActivity extends AppCompatActivity {
         cope=findViewById(R.id.copertina2);
         cerca=findViewById(R.id.cercaCnz);
         pannelloBar=findViewById(R.id.layoutBar);
+        indietro=findViewById(R.id.miePlay);
         SessionToken session=new SessionToken(this,new ComponentName(this,playBack.class));
         controller=new MediaController.Builder(this,session).buildAsync();
         controller.addListener(()->{
@@ -352,5 +356,11 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         },ContextCompat.getMainExecutor(this));
+        indietro.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(MainActivity.this,playlistaActivity.class));
+            }
+        });
     }
 }
