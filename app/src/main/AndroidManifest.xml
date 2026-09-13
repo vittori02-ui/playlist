@@ -21,6 +21,9 @@
         android:theme="@style/Theme.Playlist"
         tools:targetApi="31">
         <activity
+            android:name=".playlistActivity"
+            android:exported="false" />
+        <activity
             android:name=".playlistaActivity"
             android:exported="false" />
         <activity

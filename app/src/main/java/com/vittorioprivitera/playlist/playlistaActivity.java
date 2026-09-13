@@ -4,6 +4,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -28,12 +29,14 @@ public class playlistaActivity extends AppCompatActivity {
                     String nome=input.getText().toString().trim();
                     if(TextUtils.isEmpty(nome))
                     {
-                        dbManager.ex.execute(()->{
-                            appDb db=dbManager.getDatabase(this);
-                            db.playlistDao().inserisci(new playlist(nome));
-                            runOnUiThread(this::caricaPlaylist);
-                        });
+                        Toast.makeText(this,"nome vuoto",Toast.LENGTH_SHORT).show();
+                        return;
                     }
+                    dbManager.ex.execute(()->{
+                        appDb db=dbManager.getDatabase(this);
+                        db.playlistDao().inserisci(new playlist(nome));
+                        runOnUiThread(this::caricaPlaylist);
+                    });
                 })
                 .setNegativeButton("Annulla",null)
                 .show();
@@ -58,7 +61,11 @@ public class playlistaActivity extends AppCompatActivity {
     }
     private void apriPlaylist(playlist p)
     {
-        Toast.makeText(this,"hai aperto "+p.nome+" id "+p.id,Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this,"hai aperto "+p.nome+" id "+p.id,Toast.LENGTH_SHORT).show();
+        Intent act=new Intent(this,playlistActivity.class);
+        act.putExtra(playlistActivity.playlistID,p.id);
+        act.putExtra(playlistActivity.playlistNome,p.nome);
+        startActivity(act);
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,8 +77,9 @@ public class playlistaActivity extends AppCompatActivity {
         nuovaPlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                mostraNuova();
             }
         });
+        caricaPlaylist();
     }
 }

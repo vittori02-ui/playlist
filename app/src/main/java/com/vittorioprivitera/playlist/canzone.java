@@ -35,4 +35,5 @@ public class canzone  {
     public Uri getCopertina(){
         return copertina;
     }
+    public long getId(){return id;}
 }
