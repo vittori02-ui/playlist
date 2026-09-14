@@ -7,6 +7,8 @@ import androidx.media3.session.MediaController;
 import androidx.media3.session.SessionToken;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.os.Bundle;
 import android.widget.TextView;
@@ -40,7 +42,7 @@ public class playlistActivity extends AppCompatActivity {
                 canzoni.clear();
                 canzoni.addAll(filtrate);
                 if(canzoni.isEmpty()) Toast.makeText(this,"nessuna canzone in questa playlist",Toast.LENGTH_SHORT).show();
-                adap=new canzAdapter(canzoni,this::suona);
+                adap=new canzAdapter(canzoni,this::suona,this::rimuoviCanz);
                 lista.setAdapter(adap);
                 List<MediaItem>items=new ArrayList<>();
                 for(canzone c:canzoni)
@@ -59,6 +61,20 @@ public class playlistActivity extends AppCompatActivity {
                 playerState.contestoAttuale=idPlay;
             });
         });
+    }
+    private void rimuoviCanz(canzone canz)
+    {
+        new AlertDialog.Builder(this)
+                .setTitle("Rimuovere dalla playlist? ")
+                .setPositiveButton("Si",(d,w)->{
+                    dbManager.ex.execute(()->{
+                        appDb db=dbManager.getDatabase(this);
+                        db.playlistDao().rimuoviCanz(new playlistCanz(idPlay,canz.getId()));
+                        runOnUiThread(this::caricaCanz);
+                    });
+                })
+                .setNegativeButton("No",null)
+                .show();
     }
     private void suona(canzone canz)
     {

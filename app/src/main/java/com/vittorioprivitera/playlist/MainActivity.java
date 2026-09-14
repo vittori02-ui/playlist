@@ -9,6 +9,8 @@ import androidx.media3.common.MediaItem;
 import androidx.media3.common.MediaMetadata;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
+
+import android.app.AlertDialog;
 import android.content.ComponentName;
 import androidx.media3.session.SessionToken;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -90,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
         listaCanz.clear();
         listaCanz.addAll(caricaCanzoni());
         if(listaCanz.isEmpty())Toast.makeText(this,"nessun mp3 trovato nella cartella fatta dakl' app",Toast.LENGTH_SHORT).show();
-        adap=new canzAdapter(listaCanz,this::suona);
+        adap=new canzAdapter(listaCanz,this::suona,this::aggiungiPlaylist);
         recyclerView.setAdapter(adap);
         List<MediaItem> item=new ArrayList<>();
         for(canzone c:listaCanz)
@@ -111,6 +113,30 @@ public class MainActivity extends AppCompatActivity {
         player.prepare();
         indiceSal=-1;
         posSalvata=0;
+    }
+    private void aggiungiPlaylist(canzone canz)
+    {
+        dbManager.ex.execute(()->{
+            appDb db=dbManager.getDatabase(this);
+            List<playlist>tutte=db.playlistDao().getTutte();
+            String[]nomiPlay=new String[tutte.size()];
+            for(int i=0;i<tutte.size();i++)
+            {
+                nomiPlay[i]=tutte.get(i).nome;
+            }
+            new AlertDialog.Builder(this)
+                    .setTitle("Aggiungi playlist")
+                    .setItems(nomiPlay,(dialog,which)->{
+                        playlist sele=tutte.get(which);
+                        dbManager.ex.execute(()->{
+                            db.playlistDao().aggCanzone(new playlistCanz(sele.id,canz.getId()));
+                            runOnUiThread(()->{
+                                Toast.makeText(this,"Aggiunto a "+sele.nome,Toast.LENGTH_SHORT).show();
+                            });
+                        });
+                    })
+                    .show();
+        });
     }
     private void creaCartella()
     {
@@ -335,6 +361,13 @@ public class MainActivity extends AppCompatActivity {
                 posSalvata=0;
             }
         }
+        handler.post(upSeekBar);
+    }
+    @Override
+    protected void onPause()
+    {
+        super.onPause();
+        handler.removeCallbacks(upSeekBar);
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {

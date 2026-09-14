@@ -22,15 +22,21 @@ public class canzAdapter extends RecyclerView.Adapter<canzAdapter.canzoneViewHol
     public interface OnCanzoneClickListener{
         void onCanzoneClick(canzone can);
     }
+    public interface OnCanzoneLongClickListener
+    {
+        void onLongClick(canzone canz);
+    }
     private final List<canzone> canzoni;
     private List<canzone> canzoniMostrate;  //filtro ricerca
     private final OnCanzoneClickListener listener;
     private int posizioneSele=-1;
-    public canzAdapter(List<canzone> canzoni,OnCanzoneClickListener listener)
+    private OnCanzoneLongClickListener listener2;
+    public canzAdapter(List<canzone> canzoni,OnCanzoneClickListener listener,OnCanzoneLongClickListener listener2)
     {
         this.canzoni=canzoni;
         this.listener=listener;
         this.canzoniMostrate=new ArrayList<>(canzoni);
+        this.listener2=listener2;
     }
 
     public void filtra(String testo)
@@ -85,6 +91,10 @@ public class canzAdapter extends RecyclerView.Adapter<canzAdapter.canzoneViewHol
             notifyItemChanged(vecchiaPos);
             notifyItemChanged(posizioneSele);
             listener.onCanzoneClick(canz);
+        });
+        h.itemView.setOnLongClickListener(v->{
+            listener2.onLongClick(canz);
+            return true;
         });
     }
     private Bitmap caricaCopertina(Uri canzone,Context c)
