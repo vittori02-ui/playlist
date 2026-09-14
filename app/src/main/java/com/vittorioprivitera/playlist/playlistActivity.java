@@ -3,6 +3,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.MediaMetadata;
+import androidx.media3.common.Player;
 import androidx.media3.session.MediaController;
 import androidx.media3.session.SessionToken;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -11,16 +12,20 @@ import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.ContentUris;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
+import android.util.Size;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.bumptech.glide.Glide;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,11 +51,43 @@ public class playlistActivity extends AppCompatActivity {
         public void run() {
             if(player!=null&&player.isPlaying())
             {
-
+                long pos=player.getCurrentPosition();
+                seekBar.setProgress((int)pos);
+                tempoAttuale.setText(formatta(pos));
             }
             handler.postDelayed(this,100);
         }
     };
+    private void aggiornaUi()
+    {
+        if(indice<0||indice>=canzoni.size())return;
+        canzone canz=canzoni.get(indice);
+        textSuona.setText(canz.getTitolo());
+        pausa.setImageResource(R.drawable.chiudi);
+        seekBar.setMax((int)canz.getDura());
+        tempoTotale.setText(formatta(canz.getDura()));
+        adap.setPosSelezionata(indice);
+        Bitmap cover=caricaCope(canz.getUri());
+        if(cover!=null) Glide.with(this).load(cover).into(cope);
+        else Glide.with(this).load(R.drawable.ic_music_placeholder).into(cope);
+    }
+    private String formatta(long tempo)
+    {
+        long min=(tempo/1000)/60;
+        long sec=(tempo/1000)%60;
+        return String.format("%d:%02d",min,sec);
+    }
+    private Bitmap caricaCope(Uri uri)
+    {
+        try
+        {
+            if(Build.VERSION.SDK_INT>=29)return getContentResolver().loadThumbnail(uri,new Size(600,600),null);
+        }
+        catch (Exception e)
+        {
+        }
+        return null;
+    }
     private void caricaCanz()
     {
         dbManager.ex.execute(()->{
@@ -100,6 +137,44 @@ public class playlistActivity extends AppCompatActivity {
                 System.out.println("ERRORE in caricaCanz: " + e.getMessage());
             }
         });
+    }
+    private void collegaListe()
+    {
+        player.addListener(new Player.Listener() {
+            @Override
+            public void onMediaItemTransition(MediaItem mediaItem,int reason)
+            {
+                indice=player.getCurrentMediaItemIndex();
+                aggiornaUi();
+            }
+            @Override
+            public void onIsPlayingChanged(boolean isPlaying)
+            {
+                if(isPlaying)pausa.setImageResource(R.drawable.chiudi);
+                else pausa.setImageResource(R.drawable.apri);
+            }
+        });
+    }
+    private void impostaListeUi()
+    {
+        pausa.setOnClickListener(v->{
+            if(player.isPlaying())player.pause();
+            else player.play();
+        });
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                if(b)player.seekTo(i);
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
+        avanti.setOnClickListener(v->player.seekToNext());
+        dietro.setOnClickListener(v->player.seekToPrevious());
     }
     private List<canzone> caricaTutte()
     {
@@ -157,6 +232,18 @@ public class playlistActivity extends AppCompatActivity {
         MediaController.releaseFuture(controller);
     }
     @Override
+    protected void onResume()
+    {
+        super.onResume();
+        handler.post(upSpeek);
+    }
+    @Override
+    protected void onPause()
+    {
+        super.onPause();
+        handler.removeCallbacks(upSpeek);
+    }
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_playlist);
@@ -165,6 +252,14 @@ public class playlistActivity extends AppCompatActivity {
         TextView titolo=findViewById(R.id.nomePlaylist2);
         titolo.setText(nomePlay);
         lista=findViewById(R.id.elenco);
+        textSuona=findViewById(R.id.riproOra);
+        pausa=findViewById(R.id.pausePlay2);
+        seekBar=findViewById(R.id.seekBar2);
+        tempoAttuale=findViewById(R.id.tempo1);
+        tempoTotale=findViewById(R.id.tempo2);
+        dietro=findViewById(R.id.dietro2);
+        avanti=findViewById(R.id.avanti2);
+        cope=findViewById(R.id.copertina3);
         lista.setLayoutManager(new LinearLayoutManager(this));
         SessionToken sessionToken=new SessionToken(this,new ComponentName(this,playBack.class));
         controller=new MediaController.Builder(this,sessionToken).buildAsync();
@@ -173,6 +268,11 @@ public class playlistActivity extends AppCompatActivity {
             {
                 player=controller.get();
                 caricaCanz();
+                collegaListe();
+                impostaListeUi();
+                indice=player.getCurrentMediaItemIndex();
+                aggiornaUi();
+                handler.post(upSpeek);
             }
             catch (Exception e)
             {

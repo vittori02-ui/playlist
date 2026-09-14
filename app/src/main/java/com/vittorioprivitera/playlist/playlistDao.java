@@ -22,4 +22,6 @@ public interface playlistDao {
     void rimuoviCanz(playlistCanz pc);
     @Query("SELECT canzoneId FROM playlist_canzone WHERE playlistId = :playlistId")
     List<Long>getCanzoniIds(int playlistId);
+    @Query("SELECT DISTINCT canzoneId FROM playlist_canzone")
+    List<Long> getTutteInPlaylist();
 }

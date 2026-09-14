@@ -88,30 +88,42 @@ public class MainActivity extends AppCompatActivity {
 
     private void scanAndDisplaySong()
     {
-        listaCanz.clear();
-        listaCanz.addAll(caricaCanzoni());
-        if(listaCanz.isEmpty())Toast.makeText(this,"nessun mp3 trovato nella cartella fatta dakl' app",Toast.LENGTH_SHORT).show();
-        adap=new canzAdapter(listaCanz,this::suona,this::aggiungiPlaylist);
-        recyclerView.setAdapter(adap);
-        List<MediaItem> item=new ArrayList<>();
-        for(canzone c:listaCanz)
-        {
-            MediaMetadata metadata=new MediaMetadata.Builder()
-                    .setTitle(c.getTitolo())
-                    .setArtist(c.getAutore())
-                    .build();
+        dbManager.ex.execute(()->{
+            appDb db=dbManager.getDatabase(this);
+            List<Long>idInPlay=db.playlistDao().getTutteInPlaylist();
+            List<canzone>tutte=caricaCanzoni();
+            List<canzone>filtrate=new ArrayList<>();
+            for(canzone c:tutte)
+            {
+                if(!idInPlay.contains(c.getId()))filtrate.add(c);
+            }
+            runOnUiThread(()->{
+                listaCanz.clear();
+                listaCanz.addAll(caricaCanzoni());
+                if(listaCanz.isEmpty())Toast.makeText(this,"nessun mp3 trovato nella cartella fatta dakl' app",Toast.LENGTH_SHORT).show();
+                adap=new canzAdapter(listaCanz,this::suona,this::aggiungiPlaylist);
+                recyclerView.setAdapter(adap);
+                List<MediaItem> item=new ArrayList<>();
+                for(canzone c:listaCanz)
+                {
+                    MediaMetadata metadata=new MediaMetadata.Builder()
+                            .setTitle(c.getTitolo())
+                            .setArtist(c.getAutore())
+                            .build();
 
-            MediaItem itemMedia=new MediaItem.Builder()
-                    .setUri(c.getUri())
-                    .setMediaMetadata(metadata)
-                    .build();
+                    MediaItem itemMedia=new MediaItem.Builder()
+                            .setUri(c.getUri())
+                            .setMediaMetadata(metadata)
+                            .build();
 
-            item.add(itemMedia);
-        }
-        player.setMediaItems(item);
-        player.prepare();
-        indiceSal=-1;
-        posSalvata=0;
+                    item.add(itemMedia);
+                }
+                player.setMediaItems(item);
+                player.prepare();
+                indiceSal=-1;
+                posSalvata=0;
+            });
+        });
     }
     private void aggiungiPlaylist(canzone canz)
     {
@@ -130,13 +142,22 @@ public class MainActivity extends AppCompatActivity {
                             .setTitle("Aggiungi playlist")
                             .setItems(nomiPlay,(dialog,which)->{
                                 playlist sele=tutte.get(which);
-                                System.out.println("PLAYLIST DEBUG provo ad aggiungere canz "+canz.getId()+"playlist "+sele.id+" nome "+sele.nome);
+                                //System.out.println("PLAYLIST DEBUG provo ad aggiungere canz "+canz.getId()+"playlist "+sele.id+" nome "+sele.nome);
                                 dbManager.ex.execute(()->{
                                     db.playlistDao().aggCanzone(new playlistCanz(sele.id,canz.getId()));
                                     List<Long>verifica=db.playlistDao().getCanzoniIds(sele.id);
-                                    System.out.println("Playlist Debug inserito "+sele.id+" contiene "+verifica);
+                                    //System.out.println("Playlist Debug inserito "+sele.id+" contiene "+verifica);
                                     runOnUiThread(()->{
                                         Toast.makeText(this,"playlist id= "+sele.id+" ora contiene "+verifica,Toast.LENGTH_LONG).show();
+                                        int pos=listaCanz.indexOf(canz);
+                                        if(pos!=-1)
+                                        {
+                                            listaCanz.remove(pos);
+                                            adap.filtra(cerca.getText().toString());
+                                            if(player!=null)player.removeMediaItem(pos);
+                                            if(indice==pos)indice=-1;
+                                            else if(indice>pos)indice--;
+                                        }
                                     });
                                 });
                             })
