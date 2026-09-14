@@ -9,7 +9,6 @@ import androidx.media3.common.MediaItem;
 import androidx.media3.common.MediaMetadata;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
-
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import androidx.media3.session.SessionToken;
@@ -21,7 +20,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.media.browse.MediaBrowser;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -75,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
     private final Runnable upSeekBar=new Runnable() {
         @Override
         public void run() {
-            if(player.isPlaying())
+            if(player!=null&&player.isPlaying())
             {
                 long pos=player.getCurrentPosition();
                 seekBar.setProgress((int)pos);
@@ -369,8 +367,8 @@ public class MainActivity extends AppCompatActivity {
                 indiceSal=-1;
                 posSalvata=0;
             }
+            handler.post(upSeekBar);
         }
-        handler.post(upSeekBar);
     }
     @Override
     protected void onPause()
