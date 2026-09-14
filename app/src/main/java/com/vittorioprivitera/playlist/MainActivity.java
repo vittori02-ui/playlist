@@ -129,8 +129,11 @@ public class MainActivity extends AppCompatActivity {
                             .setTitle("Aggiungi playlist")
                             .setItems(nomiPlay,(dialog,which)->{
                                 playlist sele=tutte.get(which);
+                                android.util.Log.d("PLAYLIST DEBUG","provo ad aggiungere canz "+canz.getId()+"playlist "+sele.id+" nome "+sele.nome);
                                 dbManager.ex.execute(()->{
                                     db.playlistDao().aggCanzone(new playlistCanz(sele.id,canz.getId()));
+                                    List<Long>verifica=db.playlistDao().getCanzoniIds(sele.id);
+                                    android.util.Log.d("Playlist Debug","inserito "+sele.id+" contiene "+verifica);
                                     runOnUiThread(()->{
                                         Toast.makeText(this,"Aggiunto a "+sele.nome,Toast.LENGTH_SHORT).show();
                                     });

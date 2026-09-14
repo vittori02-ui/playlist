@@ -2,6 +2,7 @@ package com.vittorioprivitera.playlist;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import java.util.List;
 @Dao
@@ -15,7 +16,7 @@ public interface playlistDao {
     @Query("SELECT* FROM playlist ORDER BY nome ASC")
     List<playlist> getTutte();
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     void aggCanzone(playlistCanz pc);
     @Delete
     void rimuoviCanz(playlistCanz pc);

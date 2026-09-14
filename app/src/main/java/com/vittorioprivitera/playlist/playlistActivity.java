@@ -32,6 +32,7 @@ public class playlistActivity extends AppCompatActivity {
         dbManager.ex.execute(()->{
             appDb db=dbManager.getDatabase(this);
             List<Long>idDellaPlay=db.playlistDao().getCanzoniIds(idPlay);
+            android.util.Log.d("Playlist debug","apro playlist "+idPlay+" trovati "+idDellaPlay);
             List<canzone>tutteCanz=canzRepo.caricaTutte(this);
             List<canzone>filtrate=new ArrayList<>();
             for(canzone c:tutteCanz)
