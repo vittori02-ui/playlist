@@ -10,8 +10,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.AlertDialog;
 import android.content.ComponentName;
+import android.content.ContentUris;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -27,25 +30,20 @@ public class playlistActivity extends AppCompatActivity {
     private ListenableFuture<MediaController> controller;
     private final List<canzone>canzoni=new ArrayList<>();
     private int idPlay;
-
     private void caricaCanz()
     {
         dbManager.ex.execute(()->{
             try {
                 appDb db=dbManager.getDatabase(this);
                 List<Long>idDellaPlay=db.playlistDao().getCanzoniIds(idPlay);
-                System.out.println("DEBUG 1 - ID della playlist: " + idDellaPlay);
-
-                List<canzone>tutteCanz=canzRepo.caricaTutte(this);
-                System.out.println("DEBUG 2 - Tutte le canzoni: " + tutteCanz.size());
-
+                //Toast.makeText(this,"DEBUG 1 - ID della playlist: " + idDellaPlay,Toast.LENGTH_LONG).show();  //dovevano essere dei log o sout  aaaaaaa:(((
+                List<canzone>tutteCanz=caricaTutte();
+                //Toast.makeText(this,"DEBUG 2 - Tutte le canzoni: " + tutteCanz.size(),Toast.LENGTH_LONG).show();
                 List<canzone>filtrate=new ArrayList<>();
                 for(canzone c:tutteCanz)
                 {
                     if(idDellaPlay.contains(c.getId()))filtrate.add(c);
                 }
-                System.out.println("DEBUG 3 - Canzoni filtrate: " + filtrate.size());
-
                 runOnUiThread(()->{
                     try {
                         canzoni.clear();
@@ -86,7 +84,29 @@ public class playlistActivity extends AppCompatActivity {
     private List<canzone> caricaTutte()
     {
         List<canzone> canzoni=new ArrayList<>();
-        Uri col=
+        Uri col= MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+        String[]proget={MediaStore.Audio.Media._ID,MediaStore.Audio.Media.TITLE,MediaStore.Audio.Media.ARTIST,MediaStore.Audio.Media.DURATION,MediaStore.Audio.Media.ALBUM_ID};
+        String sele=MediaStore.Audio.Media.IS_MUSIC+"!=0";
+        try(Cursor c=getContentResolver().query(col,proget,sele,null,null))
+        {
+            if(c!=null)
+            {
+                int idcol=c.getColumnIndexOrThrow(MediaStore.Audio.Media._ID);
+                int titolo=c.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE);
+                int arti=c.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST);
+                int durCol=c.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION);
+                int cop=c.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID);
+                while(c.moveToNext())
+                {
+                    long id=c.getLong(idcol);
+                    Uri uri= ContentUris.withAppendedId(col,id);
+                    long album=c.getLong(cop);
+                    Uri copertina=ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart"),album);
+                    canzoni.add(new canzone(id,c.getString(titolo),c.getString(arti),c.getLong(durCol),uri,copertina));
+                }
+            }
+        }
+        return canzoni;
     }
     private void rimuoviCanz(canzone canz)
     {
