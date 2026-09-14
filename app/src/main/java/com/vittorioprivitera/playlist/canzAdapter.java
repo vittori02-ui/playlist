@@ -11,6 +11,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import android.util.Size;
+import android.widget.Toast;
+
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -93,7 +95,8 @@ public class canzAdapter extends RecyclerView.Adapter<canzAdapter.canzoneViewHol
             listener.onCanzoneClick(canz);
         });
         h.itemView.setOnLongClickListener(v->{
-            listener2.onLongClick(canz);
+            if(listener2!=null) listener2.onLongClick(canz);
+            else Toast.makeText(h.itemView.getContext(),"Long non disponibile",Toast.LENGTH_SHORT).show();
             return true;
         });
     }

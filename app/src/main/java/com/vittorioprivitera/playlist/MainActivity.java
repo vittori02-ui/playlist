@@ -116,27 +116,36 @@ public class MainActivity extends AppCompatActivity {
     }
     private void aggiungiPlaylist(canzone canz)
     {
-        dbManager.ex.execute(()->{
-            appDb db=dbManager.getDatabase(this);
-            List<playlist>tutte=db.playlistDao().getTutte();
-            String[]nomiPlay=new String[tutte.size()];
-            for(int i=0;i<tutte.size();i++)
-            {
-                nomiPlay[i]=tutte.get(i).nome;
-            }
-            new AlertDialog.Builder(this)
-                    .setTitle("Aggiungi playlist")
-                    .setItems(nomiPlay,(dialog,which)->{
-                        playlist sele=tutte.get(which);
-                        dbManager.ex.execute(()->{
-                            db.playlistDao().aggCanzone(new playlistCanz(sele.id,canz.getId()));
-                            runOnUiThread(()->{
-                                Toast.makeText(this,"Aggiunto a "+sele.nome,Toast.LENGTH_SHORT).show();
-                            });
-                        });
-                    })
-                    .show();
-        });
+        try
+        {
+            dbManager.ex.execute(()->{
+                appDb db=dbManager.getDatabase(this);
+                List<playlist>tutte=db.playlistDao().getTutte();
+                String[]nomiPlay=new String[tutte.size()];
+                for(int i=0;i<tutte.size();i++)
+                {
+                    nomiPlay[i]=tutte.get(i).nome;
+                }
+                runOnUiThread(()->{
+                    new AlertDialog.Builder(this)
+                            .setTitle("Aggiungi playlist")
+                            .setItems(nomiPlay,(dialog,which)->{
+                                playlist sele=tutte.get(which);
+                                dbManager.ex.execute(()->{
+                                    db.playlistDao().aggCanzone(new playlistCanz(sele.id,canz.getId()));
+                                    runOnUiThread(()->{
+                                        Toast.makeText(this,"Aggiunto a "+sele.nome,Toast.LENGTH_SHORT).show();
+                                    });
+                                });
+                            })
+                            .show();
+                });
+            });
+        }
+        catch (Exception e)
+        {
+            System.out.println("ERRORE NELL'AGGIUNGERE LA CANZONE");
+        }
     }
     private void creaCartella()
     {

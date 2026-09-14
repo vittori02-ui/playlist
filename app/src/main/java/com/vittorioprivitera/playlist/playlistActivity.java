@@ -64,17 +64,19 @@ public class playlistActivity extends AppCompatActivity {
     }
     private void rimuoviCanz(canzone canz)
     {
-        new AlertDialog.Builder(this)
-                .setTitle("Rimuovere dalla playlist? ")
-                .setPositiveButton("Si",(d,w)->{
-                    dbManager.ex.execute(()->{
-                        appDb db=dbManager.getDatabase(this);
-                        db.playlistDao().rimuoviCanz(new playlistCanz(idPlay,canz.getId()));
-                        runOnUiThread(this::caricaCanz);
-                    });
-                })
-                .setNegativeButton("No",null)
-                .show();
+        runOnUiThread(()->{
+            new AlertDialog.Builder(this)
+                    .setTitle("Rimuovere dalla playlist? ")
+                    .setPositiveButton("Si",(d,w)->{
+                        dbManager.ex.execute(()->{
+                            appDb db=dbManager.getDatabase(this);
+                            db.playlistDao().rimuoviCanz(new playlistCanz(idPlay,canz.getId()));
+                            runOnUiThread(this::caricaCanz);
+                        });
+                    })
+                    .setNegativeButton("No",null)
+                    .show();
+        });
     }
     private void suona(canzone canz)
     {
