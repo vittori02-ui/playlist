@@ -21,4 +21,87 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <ImageView
+            android:id="@+id/copertina3"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_marginLeft="100dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_music_placeholder" />
+
+        <TextView
+            android:id="@+id/riproOra"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <SeekBar
+            android:id="@+id/seekBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tempo1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="0:00"
+                android:textAlignment="viewStart" />
+
+            <TextView
+                android:id="@+id/tempo2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0:00"
+                android:textAlignment="textEnd" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:paddingLeft="60dp">
+
+            <ImageButton
+                android:id="@+id/dietro2"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:layout_marginRight="5dp"
+                android:background="@drawable/bottone"
+                android:padding="16dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/dietro" />
+
+            <ImageButton
+                android:id="@+id/pausePlay2"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:layout_marginRight="5dp"
+                android:background="@drawable/bottone"
+                android:padding="16dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/apri" />
+
+            <ImageButton
+                android:id="@+id/avanti2"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:background="@drawable/bottone"
+                android:padding="16dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/avanti" />
+        </LinearLayout>
+    </LinearLayout>
+
 </LinearLayout>

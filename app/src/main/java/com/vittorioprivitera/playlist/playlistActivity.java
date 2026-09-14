@@ -7,14 +7,18 @@ import androidx.media3.session.MediaController;
 import androidx.media3.session.SessionToken;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.ContentUris;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -30,6 +34,23 @@ public class playlistActivity extends AppCompatActivity {
     private ListenableFuture<MediaController> controller;
     private final List<canzone>canzoni=new ArrayList<>();
     private int idPlay;
+    private SeekBar seekBar;
+    private final Handler handler=new Handler(Looper.getMainLooper());
+    private TextView textSuona,tempoAttuale,tempoTotale;
+    private ImageButton avanti,dietro,pausa;
+    private ImageView cope;
+    private int indice=-1;
+
+    private final Runnable upSpeek=new Runnable() {
+        @Override
+        public void run() {
+            if(player!=null&&player.isPlaying())
+            {
+
+            }
+            handler.postDelayed(this,100);
+        }
+    };
     private void caricaCanz()
     {
         dbManager.ex.execute(()->{
@@ -51,7 +72,6 @@ public class playlistActivity extends AppCompatActivity {
                         if(canzoni.isEmpty()) Toast.makeText(this,"nessuna canzone in questa playlist",Toast.LENGTH_SHORT).show();
                         adap=new canzAdapter(canzoni,this::suona,this::rimuoviCanz);
                         lista.setAdapter(adap);
-
                         List<MediaItem>items=new ArrayList<>();
                         for(canzone c:canzoni)
                         {

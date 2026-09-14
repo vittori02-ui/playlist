@@ -17,7 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="LE MIE CANZONI"
+            android:text="I MIEI PREFERITI"
             android:textAlignment="center"
             android:textSize="30sp"
             android:textStyle="bold" />
