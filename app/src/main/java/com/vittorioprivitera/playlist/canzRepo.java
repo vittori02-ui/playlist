@@ -18,7 +18,7 @@ public class canzRepo {
                 MediaStore.Audio.Media.DURATION,
                 MediaStore.Audio.Media.ALBUM_ID
         };
-        String sele=MediaStore.Audio.Media.IS_MUSIC+"!=0 AND "+ MediaStore.Audio.Media.RELATIVE_PATH+" LIKE ?";
+        String sele=MediaStore.Audio.Media.IS_MUSIC+"!=0";
         String[] arg={"Music/MiaPlaylist%"};
         try(Cursor c=cont.getContentResolver().query(col,progetto,sele,arg,null))
         {
@@ -35,6 +35,7 @@ public class canzRepo {
                     Uri uri= ContentUris.withAppendedId(col,id);
                     long almbId=c.getLong(cop);
                     Uri copertina=ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart"),almbId);
+                    canzoni.add(new canzone(id,c.getString(tit),c.getString(arti),c.getLong(durCol),uri,copertina));
                 }
             }
         }

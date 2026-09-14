@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.AlertDialog;
 import android.content.ComponentName;
+import android.net.Uri;
 import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,38 +31,62 @@ public class playlistActivity extends AppCompatActivity {
     private void caricaCanz()
     {
         dbManager.ex.execute(()->{
-            appDb db=dbManager.getDatabase(this);
-            List<Long>idDellaPlay=db.playlistDao().getCanzoniIds(idPlay);
-            android.util.Log.d("Playlist debug","apro playlist "+idPlay+" trovati "+idDellaPlay);
-            List<canzone>tutteCanz=canzRepo.caricaTutte(this);
-            List<canzone>filtrate=new ArrayList<>();
-            for(canzone c:tutteCanz)
-            {
-                if(idDellaPlay.contains(c.getId()))filtrate.add(c);
-            }
-            runOnUiThread(()->{
-                canzoni.clear();
-                canzoni.addAll(filtrate);
-                if(canzoni.isEmpty()) Toast.makeText(this,"nessuna canzone in questa playlist",Toast.LENGTH_SHORT).show();
-                adap=new canzAdapter(canzoni,this::suona,this::rimuoviCanz);
-                lista.setAdapter(adap);
-                List<MediaItem>items=new ArrayList<>();
-                for(canzone c:canzoni)
+            try {
+                appDb db=dbManager.getDatabase(this);
+                List<Long>idDellaPlay=db.playlistDao().getCanzoniIds(idPlay);
+                System.out.println("DEBUG 1 - ID della playlist: " + idDellaPlay);
+
+                List<canzone>tutteCanz=canzRepo.caricaTutte(this);
+                System.out.println("DEBUG 2 - Tutte le canzoni: " + tutteCanz.size());
+
+                List<canzone>filtrate=new ArrayList<>();
+                for(canzone c:tutteCanz)
                 {
-                    MediaMetadata metadata=new MediaMetadata.Builder()
-                            .setTitle(c.getTitolo())
-                            .setArtist(c.getAutore())
-                            .build();
-                    items.add(new MediaItem.Builder()
-                            .setUri(c.getUri())
-                            .setMediaMetadata(metadata)
-                            .build());
+                    if(idDellaPlay.contains(c.getId()))filtrate.add(c);
                 }
-                player.setMediaItems(items);
-                player.prepare();
-                playerState.contestoAttuale=idPlay;
-            });
+                System.out.println("DEBUG 3 - Canzoni filtrate: " + filtrate.size());
+
+                runOnUiThread(()->{
+                    try {
+                        canzoni.clear();
+                        canzoni.addAll(filtrate);
+                        if(canzoni.isEmpty()) Toast.makeText(this,"nessuna canzone in questa playlist",Toast.LENGTH_SHORT).show();
+                        adap=new canzAdapter(canzoni,this::suona,this::rimuoviCanz);
+                        lista.setAdapter(adap);
+
+                        List<MediaItem>items=new ArrayList<>();
+                        for(canzone c:canzoni)
+                        {
+                            MediaMetadata metadata=new MediaMetadata.Builder()
+                                    .setTitle(c.getTitolo())
+                                    .setArtist(c.getAutore())
+                                    .build();
+                            items.add(new MediaItem.Builder()
+                                    .setUri(c.getUri())
+                                    .setMediaMetadata(metadata)
+                                    .build());
+                        }
+                        if(player != null && !items.isEmpty())
+                        {
+                            player.setMediaItems(items);
+                            player.prepare();
+                        }
+                        playerState.contestoAttuale=idPlay;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        System.out.println("ERRORE in runOnUiThread: " + e.getMessage());
+                    }
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("ERRORE in caricaCanz: " + e.getMessage());
+            }
         });
+    }
+    private List<canzone> caricaTutte()
+    {
+        List<canzone> canzoni=new ArrayList<>();
+        Uri col=
     }
     private void rimuoviCanz(canzone canz)
     {
