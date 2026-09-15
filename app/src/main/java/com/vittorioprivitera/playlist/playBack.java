@@ -66,4 +66,12 @@ public class playBack extends MediaSessionService {
         session=null;
         super.onDestroy();
     }
+    @Override
+    public void onTaskRemoved(android.content.Intent rootIntent)
+    {
+        session.getPlayer().pause();
+        session.getPlayer().stop();
+        stopSelf();
+        super.onTaskRemoved(rootIntent);
+    }
 }

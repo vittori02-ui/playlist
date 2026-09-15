@@ -31,7 +31,7 @@ public class canzAdapter extends RecyclerView.Adapter<canzAdapter.canzoneViewHol
     private final List<canzone> canzoni;
     private List<canzone> canzoniMostrate;  //filtro ricerca
     private final OnCanzoneClickListener listener;
-    private int posizioneSele=-1;
+    private long posizioneSele=-1;
     private OnCanzoneLongClickListener listener2;
     public canzAdapter(List<canzone> canzoni,OnCanzoneClickListener listener,OnCanzoneLongClickListener listener2)
     {
@@ -53,7 +53,6 @@ public class canzAdapter extends RecyclerView.Adapter<canzAdapter.canzoneViewHol
                 if(c.getTitolo().toLowerCase().contains(cerca)||c.getAutore().toLowerCase().contains(cerca))canzoniMostrate.add(c);
             }
         }
-        posizioneSele=1; //reset visivo quando filtri che vedi la prima ricerca per essere riprodotta
         notifyDataSetChanged();
     }
 
@@ -64,12 +63,10 @@ public class canzAdapter extends RecyclerView.Adapter<canzAdapter.canzoneViewHol
         View v= LayoutInflater.from(parent.getContext()).inflate(R.layout.canzone,parent,false);
         return new canzoneViewHolder(v);
     }
-    public void setPosSelezionata(int pos)
+    public void setCanzoneSelezionata(long pos)
     {
-        int vecchiaPos=posizioneSele;
         posizioneSele=pos;
-        notifyItemChanged(vecchiaPos);
-        notifyItemChanged(posizioneSele);
+        notifyDataSetChanged();
     }
     @Override
     public void onBindViewHolder(@NonNull canzoneViewHolder h,int position)
@@ -78,7 +75,7 @@ public class canzAdapter extends RecyclerView.Adapter<canzAdapter.canzoneViewHol
         h.titolo.setText(canz.getTitolo());
         h.artista.setText(canz.getAutore());
         h.numero.setText(String.valueOf(position+1));
-        h.itemView.setBackgroundColor(ContextCompat.getColor(h.itemView.getContext(),position==posizioneSele?R.color.selezionato:R.color.trasparente));
+        h.itemView.setBackgroundColor(ContextCompat.getColor(h.itemView.getContext(),canz.getId()==posizioneSele?R.color.selezionato:R.color.trasparente));
         /*Glide.with(h.itemView.getContext())  //vechio sistema per versioni piu vecchie di android
                         .load(canz.getCopertina())
                                 .placeholder(R.drawable.ic_music_placeholder)
@@ -88,10 +85,8 @@ public class canzAdapter extends RecyclerView.Adapter<canzAdapter.canzoneViewHol
         if(cover!=null)Glide.with(h.itemView.getContext()).load(cover).into(h.copertina);
         else Glide.with(h.itemView.getContext()).load(R.drawable.ic_music_placeholder).into(h.copertina);
         h.itemView.setOnClickListener(view -> {
-            int vecchiaPos=posizioneSele;
-            posizioneSele=h.getAdapterPosition();
-            notifyItemChanged(vecchiaPos);
-            notifyItemChanged(posizioneSele);
+            posizioneSele=canz.getId();
+            notifyDataSetChanged();
             listener.onCanzoneClick(canz);
         });
         h.itemView.setOnLongClickListener(v->{

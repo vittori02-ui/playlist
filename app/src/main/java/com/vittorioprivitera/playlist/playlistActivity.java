@@ -66,7 +66,7 @@ public class playlistActivity extends AppCompatActivity {
         pausa.setImageResource(R.drawable.chiudi);
         seekBar.setMax((int)canz.getDura());
         tempoTotale.setText(formatta(canz.getDura()));
-        adap.setPosSelezionata(indice);
+        adap.setCanzoneSelezionata(canz.getId());
         Bitmap cover=caricaCope(canz.getUri());
         if(cover!=null) Glide.with(this).load(cover).into(cope);
         else Glide.with(this).load(R.drawable.ic_music_placeholder).into(cope);
