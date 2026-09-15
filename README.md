@@ -8,7 +8,7 @@ use the slider and the widget, and it also works with the screen off. If you clo
 In the app, you can see a progressive number indicating how many files there are, the song image (otherwise a default one is used), the title, 
 and the artist. The audio system lowers the volume if a call or another app that generates audio comes in, to give space to the call or whatever. 
 There's also a search bar that searches in real time and checks title or artist, along with a system that shows the album cover with the image of 
-the song and the slider that moves and the time that has passed
+the song and the slider that moves and the time that has passed. And also when you're on the home screen, like the one with my favorites, if you hold down on a track, a dialog pops up asking which playlist you want to put it in, and from there it disappears, and from the selected playlist you hold down, confirm, and it gets removed from the playlist and goes back to favorites.
 
 ### Inspiration
 It comes from my last trip to Greece when I forgot to download the songs for when I was on the plane, and the ones I had were handled badly by
@@ -22,7 +22,7 @@ P.S. If the folder doesn't appear right away, allow permissions for media and au
 and check again if the folder is there.
 
 ### Some photos
-![](img1.jpeg) ![](img2.jpeg) ![](img3.jpeg) ![](img4.jpeg) ![](img5.jpeg) ![](img6.jpeg) ![](img7.jpeg)   
+![](img1.jpeg) ![](img2.jpeg) ![](img3.jpeg) ![](img5.jpeg) ![](img6.jpeg) ![](img7.jpeg)   
 
 
 The songs here are taken from a site that respects copyright (jamendo.com) and the app icon was taken from the internet
