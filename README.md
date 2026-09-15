@@ -22,3 +22,4 @@ P.S. If the folder doesn't appear right away, allow permissions for media and au
 and check again if the folder is there.
 
 ### Some photos
+![](img1.jpeg) ![](img2.jpeg) ![](img3.jpeg) ![](img4.jpeg) ![](img5.jpeg) ![](img6.jpeg) ![](img7.jpeg)      
