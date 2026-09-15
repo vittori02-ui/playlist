@@ -22,4 +22,7 @@ P.S. If the folder doesn't appear right away, allow permissions for media and au
 and check again if the folder is there.
 
 ### Some photos
-![](img1.jpeg) ![](img2.jpeg) ![](img3.jpeg) ![](img4.jpeg) ![](img5.jpeg) ![](img6.jpeg) ![](img7.jpeg)      
+![](img1.jpeg) ![](img2.jpeg) ![](img3.jpeg) ![](img4.jpeg) ![](img5.jpeg) ![](img6.jpeg) ![](img7.jpeg)   
+
+
+The songs here are taken from a site that respects copyright (jamendo.com) and the app icon was taken from the internet
